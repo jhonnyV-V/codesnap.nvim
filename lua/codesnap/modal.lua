@@ -7,11 +7,13 @@ local M = {}
 function M.pop_modal(selected_text, filetype, callback)
   if not selected_text or selected_text == "" then
     vim.notify("No text provided to modal", vim.log.levels.ERROR)
-    if callback then callback(nil) end
+    if callback then
+      callback(nil)
+    end
     return
   end
 
-  local selected_lines = vim.split(selected_text, '\n', { plain = true })
+  local selected_lines = vim.split(selected_text, "\n", { plain = true })
 
   -- Create a new buffer for the floating window
   local buf = vim.api.nvim_create_buf(false, true)
@@ -19,13 +21,13 @@ function M.pop_modal(selected_text, filetype, callback)
 
   -- Set filetype for syntax highlighting if provided
   if filetype and filetype ~= "" then
-    vim.api.nvim_buf_set_option(buf, 'filetype', filetype)
+    vim.api.nvim_buf_set_option(buf, "filetype", filetype)
   end
 
   -- Make the buffer read-only
-  vim.api.nvim_buf_set_option(buf, 'modifiable', false)
-  vim.api.nvim_buf_set_option(buf, 'buftype', 'nofile')
-  vim.api.nvim_buf_set_option(buf, 'readonly', true)
+  vim.api.nvim_buf_set_option(buf, "modifiable", false)
+  vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
+  vim.api.nvim_buf_set_option(buf, "readonly", true)
 
   -- Calculate window size and position
   local width = 0
@@ -42,22 +44,22 @@ function M.pop_modal(selected_text, filetype, callback)
 
   -- Create floating window
   local win = vim.api.nvim_open_win(buf, true, {
-    relative = 'editor',
+    relative = "editor",
     row = row,
     col = col,
     width = width,
     height = height,
-    style = 'minimal',
-    border = 'rounded',
-    title = ' Select text to highlight (Press Enter to confirm, Esc to cancel) ',
-    title_pos = 'center',
+    style = "minimal",
+    border = "rounded",
+    title = " Select text to highlight (Press Enter to confirm, Esc to cancel) ",
+    title_pos = "center",
     focusable = true,
   })
 
   -- Set window options
-  vim.api.nvim_win_set_option(win, 'cursorline', true)
-  vim.api.nvim_win_set_option(win, 'number', true)
-  vim.api.nvim_win_set_option(win, 'relativenumber', false)
+  vim.api.nvim_win_set_option(win, "cursorline", true)
+  vim.api.nvim_win_set_option(win, "number", true)
+  vim.api.nvim_win_set_option(win, "relativenumber", false)
 
   -- Ensure the window has focus
   vim.api.nvim_set_current_win(win)
@@ -75,14 +77,14 @@ function M.pop_modal(selected_text, filetype, callback)
   end
 
   -- Set up keymaps for the floating window
-  vim.keymap.set({'n', 'v'}, '<CR>', function()
+  vim.keymap.set({ "n", "v" }, "<CR>", function()
     -- Get the current mode
     local mode = vim.api.nvim_get_mode().mode
 
-    if mode == 'v' or mode == 'V' or mode == '\22' then  -- \22 is Ctrl-V (visual block mode)
+    if mode == "v" or mode == "V" or mode == "\22" then -- \22 is Ctrl-V (visual block mode)
       -- Visual mode - get the selection range before exiting visual mode
-      local start_pos = vim.fn.getpos('v')
-      local end_pos = vim.fn.getpos('.')
+      local start_pos = vim.fn.getpos("v")
+      local end_pos = vim.fn.getpos(".")
 
       -- Ensure start_pos is before end_pos
       if start_pos[2] > end_pos[2] then
@@ -90,24 +92,24 @@ function M.pop_modal(selected_text, filetype, callback)
       end
 
       -- Exit visual mode
-      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, false, true), 'n', false)
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
 
-      close_and_callback({start_pos[2], end_pos[2]})  -- Return line numbers
+      close_and_callback({ start_pos[2], end_pos[2] }) -- Return line numbers
     else
       -- No selection, return the entire buffer range
       local line_count = vim.api.nvim_buf_line_count(buf)
-      close_and_callback({1, line_count})
+      close_and_callback({ 1, line_count })
     end
   end, { buffer = buf })
 
   -- Set up keymap to close window with Esc
-  vim.keymap.set({'n', 'v'}, '<Esc>', function()
-    close_and_callback(nil)  -- User cancelled
+  vim.keymap.set({ "n", "v" }, "<Esc>", function()
+    close_and_callback(nil) -- User cancelled
   end, { buffer = buf })
 
   -- Set up keymap to close window with q
-  vim.keymap.set('n', 'q', function()
-    close_and_callback(nil)  -- User cancelled
+  vim.keymap.set("n", "q", function()
+    close_and_callback(nil) -- User cancelled
   end, { buffer = buf })
 end
 
