@@ -45,6 +45,10 @@ end
 
 function module.load_generator(is_debug)
   local generator_path = module.generator_file_path(is_debug)
+  -- Add placeholder for `generator` in file path for cpath
+  local dir = vim.fn.fnamemodify(generator_path, ":h")
+  local file_name = vim.fn.fnamemodify(generator_path, ":t")
+  generator_path = dir .. "/" .. file_name:gsub("_generator", "_?")
 
   package.cpath = path_utils.join(";", package.cpath, generator_path)
 
